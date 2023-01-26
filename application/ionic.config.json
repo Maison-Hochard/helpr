@@ -1,0 +1,8 @@
+{
+  "name": "Helpr",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue",
+  "id": "f69f546f"
+}
