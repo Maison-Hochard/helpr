@@ -18,12 +18,13 @@ services:
     volumes:
       - .:/app
   api:
+    platform: linux/amd64
     container_name: helpr-api
     build:
-      context: ./api
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8080:3000"
     env_file:
       - .env
     environment:
