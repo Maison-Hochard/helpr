@@ -1,12 +1,13 @@
 <template>
   <ion-page>
-    <ion-header class="flex flex-col items-center justify-center gap-3 p-10">
-      <img class="w-1/6" src="../../resources/icons/helpr-logo-icon-md-blanc.svg" alt=""/>
-      <ion-title class="font-bold text-4xl">Sign in</ion-title>
-    </ion-header>
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
+      <ion-header class="m-5">
+        <ion-row>
+          <img class="w-5" src="../../resources/icons/helpr-logo-icon-md-blanc.svg" alt=""/>
+          <ion-title class="m-5" size="large">Settings</ion-title>
+        </ion-row>
       </ion-header>
+      <ExploreContainer name="Settings" />
     </ion-content>
   </ion-page>
 </template>

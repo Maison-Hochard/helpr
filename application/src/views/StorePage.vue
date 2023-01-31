@@ -1,18 +1,16 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Tab 2</ion-title>
-      </ion-toolbar>
-    </ion-header>
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Search</ion-title>
-        </ion-toolbar>
+      <ion-header class="m-5">
+        <ion-row>
+          <img class="w-5" src="../../resources/icons/helpr-logo-icon-md-blanc.svg" alt=""/>
+          <ion-title class="m-5" size="large">Store</ion-title>
+        </ion-row>
       </ion-header>
 
-      <ExploreContainer name="Search page" />
+      <ion-searchbar></ion-searchbar>
+
+      <ExploreContainer name="Store" />
     </ion-content>
   </ion-page>
 </template>

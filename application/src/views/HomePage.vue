@@ -1,18 +1,13 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Tab 3</ion-title>
-      </ion-toolbar>
-    </ion-header>
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Tab 3</ion-title>
-        </ion-toolbar>
+      <ion-header class="m-5">
+        <ion-row>
+          <img class="w-5" src="../../resources/icons/helpr-logo-icon-md-blanc.svg" alt=""/>
+          <ion-title class="m-5" size="large">Home</ion-title>
+        </ion-row>
       </ion-header>
-
-      <ExploreContainer name="Tab 3 page" />
+      <ExploreContainer name="Home" />
     </ion-content>
   </ion-page>
 </template>
@@ -26,4 +21,5 @@ import {
   IonContent,
 } from "@ionic/vue";
 import ExploreContainer from "@/components/ExploreContainer.vue";
+import { addCircle, home } from "ionicons/icons";
 </script>
