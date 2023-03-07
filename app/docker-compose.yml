@@ -1,29 +1,11 @@
 version: '3.9'
 services:
   app:
-    platform: linux/amd64
     container_name: helpr-app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8081:8080"
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - FRONTEND_URL=${FRONTEND_URL}
-      - API_URL=${API_URL}
-      - AUTH_TOKEN_SECRET=${AUTH_TOKEN_SECRET}
-      - AUTH_TOKEN_EXPIRATION=${AUTH_TOKEN_EXPIRATION}
-      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
-      - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
-      - MAILER_HOST=${MAILER_HOST}
-      - MAILER_PORT=${MAILER_PORT}
-      - MAILER_USER=${MAILER_USER}
-      - MAILER_PASSWORD=${MAILER_PASSWORD}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - APP_ENV=${APP_ENV}
+      - "8081:3000"
     volumes:
       - .:/app
