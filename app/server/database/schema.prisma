@@ -9,24 +9,22 @@ datasource db {
 }
 
 model EmailVerification {
-  id        Int      @id @default(autoincrement())
   token     String   @unique
-  userId    Int
   createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ResetPassword {
-  id        Int      @id @default(autoincrement())
   token     String   @unique
-  userId    Int
   createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
-  id            Int     @id @default(autoincrement())
-  userId        Int
   stripeId      String  @unique
   stripeStatus  String?
   stripePriceId String?
@@ -34,26 +32,147 @@ model Subscription {
   endsAt        Int?
   startDate     Int
   lastEventDate Int
+  id            Int     @id @default(autoincrement())
+  userId        Int
+  name          String
   User          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id                Int                 @id @default(autoincrement())
-  loginType         String?             @default("email")
-  username          String              @unique
-  email             String              @unique
-  firstname         String
-  lastname          String
-  password          String
-  stripeCustomerId  String?
-  createdAt         DateTime            @default(now())
-  profilePicture    String?
-  updatedAt         DateTime?           @updatedAt
-  role              Int?                @default(1)
-  isVerified        Boolean             @default(false)
-  refreshToken      String?             @unique
-  authToken         String?             @unique
-  EmailVerification EmailVerification[]
-  ResetPassword     ResetPassword[]
-  Subscription      Subscription[]
+  loginType           String?               @default("email")
+  username            String                @unique
+  email               String                @unique
+  firstname           String
+  lastname            String
+  password            String
+  stripeCustomerId    String?
+  bio                 String?               @default("No bio yet")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime?             @updatedAt
+  role                Int                   @default(1)
+  isVerified          Boolean               @default(false)
+  refreshToken        String?               @unique
+  authToken           String?               @unique
+  id                  Int                   @id @default(autoincrement())
+  avatar              String                @default("https://uynsrkwqyplqhfrmdaqw.supabase.co/storage/v1/object/public/avatars/default-avatar")
+  cover               String                @default("https://uynsrkwqyplqhfrmdaqw.supabase.co/storage/v1/object/public/avatars/default-cover")
+  providerId          Int?
+  emailVerification   EmailVerification?
+  flow                Flow[]
+  providerCredentials ProviderCredentials[]
+  resetPassword       ResetPassword?
+  subscription        Subscription[]
+  provider            Provider[]            @relation("ProviderToUser")
+}
+
+model ProviderCredentials {
+  id           Int     @id @default(autoincrement())
+  providerId   String  @unique
+  provider     String
+  accessToken  String
+  userId       Int
+  expiresAt    Int?
+  refreshToken String?
+  User         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Action {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  endpoint    String
+  name        String        @unique
+  providerId  Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime?
+  premium     Boolean       @default(false)
+  Provider    Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  FlowActions FlowActions[]
+  Variables   Variables[]   @relation("ActionToVariables")
+}
+
+model Flow {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String?
+  public        Boolean         @default(false)
+  accessToken   String
+  enabled       Boolean         @default(true)
+  status        Int             @default(1)
+  userId        Int
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime?
+  triggerId     Int
+  Trigger       Trigger         @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  User          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  FlowActions   FlowActions[]
+  FlowVariables FlowVariables[]
+}
+
+model FlowActions {
+  id        Int       @id @default(autoincrement())
+  flowId    Int
+  actionId  Int
+  payload   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  index     Int
+  Action    Action    @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  Flow      Flow      @relation(fields: [flowId], references: [id], onDelete: Cascade)
+}
+
+model Provider {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  logo        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+  premium     Boolean   @default(false)
+  tokenLink   String?
+  Action      Action[]
+  Trigger     Trigger[]
+  User        User[]    @relation("ProviderToUser")
+}
+
+model Trigger {
+  id          Int         @id @default(autoincrement())
+  provider    String
+  title       String      @unique
+  value       String
+  webhook     Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime?
+  providerId  Int
+  description String
+  premium     Boolean     @default(false)
+  key         String      @unique
+  Flow        Flow[]
+  Provider    Provider    @relation(fields: [providerId], references: [id])
+  Variables   Variables[]
+}
+
+model FlowVariables {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  flowId    Int?
+  Flow      Flow?     @relation(fields: [flowId], references: [id], onDelete: Cascade)
+}
+
+model Variables {
+  id        Int       @id @default(autoincrement())
+  key       String
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  triggerId Int?
+  title     String
+  type      String    @default("text")
+  required  Boolean   @default(true)
+  webhook   Boolean   @default(false)
+  Trigger   Trigger?  @relation(fields: [triggerId], references: [id])
+  Action    Action[]  @relation("ActionToVariables")
 }

@@ -14,6 +14,7 @@ module.exports = {
   rules: {
     "vue/no-deprecated-slot-attribute": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    'vue/multi-word-component-names': 'off',
   },
   overrides: [
     {

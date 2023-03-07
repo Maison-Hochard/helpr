@@ -3,8 +3,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  MinLength,
+  MinLength, ValidateNested
 } from "class-validator";
+import { Type } from "class-transformer";
+import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateUserDto {
   @IsString()
@@ -29,7 +31,15 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
-  profilePicture?: string;
+  avatar?: string;
+
+  @IsString()
+  @IsOptional()
+  cover?: string;
 
   role?: number;
+  @ValidateNested({ each: true })
+  @Type(() => CreateUserDto)
+  @ApiProperty({ type: [CreateUserDto] })
+  children?: CreateUserDto[];
 }

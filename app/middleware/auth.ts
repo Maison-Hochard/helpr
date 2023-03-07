@@ -1,6 +1,10 @@
 export default defineNuxtRouteMiddleware(async () => {
-  const user = await useUser();
-  if (user == null && user == undefined) {
+  await useUser();
+  const user = useUserStore().getUser;
+  if (!user) {
     return "/login";
+  }
+  if (user.isVerified == false) {
+    return "/verify/user";
   }
 });

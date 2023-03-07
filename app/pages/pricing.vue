@@ -1,77 +1,113 @@
 <script setup lang="ts">
-import { AvailablePlans, Plan } from "~/types/Pricing";
+import Footer from "@/components/layout/Footer.vue";
+import { CheckIcon } from "@heroicons/vue/24/outline";
+import { Plan, Plans } from "~/types/Pricing";
 definePageMeta({
   name: "Pricing",
   title: "Pricing",
   description: "Pricing page",
 });
 
-const plans: Plan[] = [
-  {
-    id: "prod_NEMP9hBJdE3WNV",
-    name: "Professional",
-    price: 35,
-    priceId: AvailablePlans.PRO,
-    description: "Lorem ipsum dolor sit amet consect etur adipisicing elit. Itaque amet indis perferendis.",
-    features: [
-      "Pariatur quod similique",
-      "Sapiente libero doloribus modi nostrum",
-      "Vel ipsa esse repudiandae excepturi",
-      "Itaque cupiditate adipisci quibusdam",
-    ],
-  },
-  {
-    id: "prod_NEMP9hBJdE3WNV",
-    name: "Premium",
-    price: 95,
-    priceId: AvailablePlans.PREMIUM,
-    description: "Lorem ipsum dolor sit amet consect etur adipisicing elit. Itaque amet indis perferendis.",
-    features: [
-      "Pariatur quod similique",
-      "Sapiente libero doloribus modi nostrum",
-      "Vel ipsa esse repudiandae excepturi",
-      "Itaque cupiditate adipisci quibusdam",
-      "Sapiente libero doloribus modi nostrum",
-    ],
-  },
-];
+const subscription = useUserStore().getSubscription;
+
+const premiumPlan: Plan = {
+  id: "prod_NEMP9hBJdE3WNV",
+  name: "Premium",
+  price: 7.99,
+  priceId: Plans.PREMIUM.priceId,
+  description: "Upgrade to Premium to unlock all the features of Helpr !!!",
+  features: [
+    "Unlimited flows",
+    "Unlimited actions",
+    "Unlimited triggers",
+    "Unlimited integrations",
+    "Unlimited team members",
+    "Priority support",
+  ],
+};
+
+const user = useUserStore().getUser;
+
+async function redirectToLogin() {
+  if (!user) {
+    useRouter().push("/login");
+  }
+}
 </script>
 
 <template>
-  <div class="bg-primary">
-    <div class="relative overflow-hidden pt-32 pb-96 lg:pt-40">
-      <div><img class="absolute bottom-0 left-1/2 w-[1440px] max-w-none -translate-x-1/2" src="https://tailwindui.com/img/component-images/grid-blur-purple-on-black.jpg" alt="" /></div>
-      <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8">
-        <div class="mx-auto max-w-2xl lg:max-w-4xl">
-          <h2 class="text-lg font-semibold leading-8 text-accent">Tarifs</h2>
-          <p class="mt-2 text-4xl font-bold tracking-tight text-white">Lorem ipsum dolor sit</p>
-          <p class="mt-6 text-lg leading-8 text-white/60">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos odit doloribus molestiae voluptatum.</p>
+  <div class="py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+          {{ $t("pricing.title_start") }}<span class="text-gradient">{{ $t("pricing.era") }}</span
+          >{{ $t("pricing.title_end") }}
+        </h2>
+        <p class="mt-6 text-lg leading-8 text-muted">
+          {{ $t("pricing.description") }}
+        </p>
+      </div>
+      <div
+        class="relative backdrop-blur-md bg-primary-opacity/30 mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-secondary sm:mt-20 lg:mx-0 lg:flex lg:max-w-none"
+      >
+        <div
+          class="backdrop-shadow-sm bg-accent top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 absolute z-0"
+        ></div>
+        <div class="p-8 sm:p-10 lg:flex-auto">
+          <h3 class="text-2xl font-bold tracking-tight text-primary">Premium Membership</h3>
+          <p class="mt-6 text-base leading-7 text-muted">
+            {{ premiumPlan.description }}
+          </p>
+          <div class="mt-10 flex items-center gap-x-4">
+            <h4 class="flex-none text-sm font-semibold leading-6 text-muted">
+              {{ $t("pricing.whats_included") }}
+            </h4>
+            <div class="h-px flex-auto bg-secondary" />
+          </div>
+          <ul role="list" class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-muted sm:grid-cols-2 sm:gap-6">
+            <li v-for="feature in premiumPlan.features" :key="feature" class="flex gap-x-3">
+              <CheckIcon class="h-6 w-5 flex-none text-accent" aria-hidden="true" />
+              {{ feature }}
+            </li>
+          </ul>
         </div>
+        <form
+          action="/api/stripe/subscribe"
+          method="post"
+          class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0"
+        >
+          <div
+            class="rounded-2xl backdrop-blur-md bg-primary-opacity/60 shadow-2xl py-10 text-center lg:flex lg:flex-col lg:justify-center lg:py-16"
+          >
+            <div class="mx-auto max-w-xs px-8">
+              <p class="text-base font-semibold text-muted">
+                {{ $t("pricing.boost") }}
+              </p>
+              <p class="mt-6 flex items-baseline justify-center gap-x-2">
+                <span class="text-5xl font-bold tracking-tight text-primary">{{ premiumPlan.price }}€</span>
+                <span class="text-sm font-semibold leading-6 tracking-wide text-muted">/m</span>
+              </p>
+              <input type="hidden" name="userId" :value="user?.id" />
+              <button
+                :type="user ? 'submit' : 'button'"
+                @click="user ? null : redirectToLogin()"
+                name="priceId"
+                :value="premiumPlan.priceId"
+                class="btn-primary mt-8 w-full"
+                :aria-describedby="user ? null : 'login-required'"
+                :disabled="subscription && subscription[0]?.name === premiumPlan.name"
+                :class="subscription && subscription[0]?.name === premiumPlan.name ? 'cursor-not-allowed' : ''"
+              >
+                {{ $t("pricing.subscribe") }}
+              </button>
+              <p class="mt-6 text-xs leading-5 text-muted">
+                {{ $t("pricing.terms") }}
+              </p>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
-    <div class="flow-root bg-primary pb-32 lg:pb-40">
-      <div class="relative -mt-80">
-        <div class="relative z-1 mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="mx-auto grid max-w-md grid-cols-1 gap-8 lg:max-w-4xl lg:grid-cols-2 lg:gap-8">
-            <PlanPricing v-for="plan in plans" :key="plan.id" :subscription="plan" />
-          </div>
-        </div>
-      </div>
-      <div class="relative mx-auto mt-8 max-w-7xl px-6 lg:px-8">
-        <div class="mx-auto max-w-md lg:max-w-4xl">
-          <div class="flex flex-col gap-6 rounded-3xl p-8 bg-secondary sm:p-10 lg:flex-row lg:items-center lg:gap-8">
-            <div class="lg:min-w-0 lg:flex-1">
-              <h3 class="text-lg font-semibold leading-8 tracking-tight text-primary">Custom</h3>
-              <div class="mt-2 text-base leading-7 text-gray-600">
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</p>
-              </div>
-            </div>
-            <div>
-              <NuxtLink :to="{ name: 'Contact' }" class="rounded-lg bg-accent px-4 py-2.5 text-center text-sm font-semibold leading-5 text-inverted hover:bg-accent-hover">Contact Us<span aria-hidden="true">&rarr;</span></NuxtLink>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Footer />
   </div>
 </template>

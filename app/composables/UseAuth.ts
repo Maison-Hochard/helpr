@@ -1,46 +1,21 @@
-import { User } from "@prisma/client";
-
-export const useAuthCookie = () => useCookie("authToken");
+import { User } from "~~/types/User";
+import { useUserStore } from "~~/store/userStore";
 
 export async function useUser(): Promise<User | null> {
-  const authCookie = useAuthCookie().value;
-  const user = useState<User | null>("user");
+  const authCookie = useCookie("authToken").value;
+  const user = useUserStore().getUser;
 
-  if (authCookie && !user.value) {
+  if (authCookie && !user) {
     const cookieHeaders = useRequestHeaders(["cookie"]);
-    const { data } = await useFetch<User>("/api/auth/users-token", {
+    const { data } = await useFetch<User>("/api/auth/currentUser", {
       method: "GET",
       headers: cookieHeaders as HeadersInit,
     });
-    user.value = data.value;
+    if (!data.value) {
+      return null;
+    }
+    useUserStore().setUser(data.value);
+    useUserStore().setSubscription(data.value.subscription);
   }
-
-  return user.value;
-}
-
-export async function useLogin(login: string, password: string): Promise<User|null> {
-  const config = useRuntimeConfig();
-  const response = await $fetch<User>(`${config.public.apiUrl}auth/login`, {
-    method: "POST",
-    body: {
-      login,
-      password,
-    },
-    credentials: "include",
-  });
-  if (!response) return null;
-  useState<User|null>("user").value = response;
-  useRouter().push("/app/profile");
-  return response;
-}
-
-export async function useLogout() {
-  const user = useState<User|null>("user");
-  if (!user.value) {
-    useRouter().push("/");
-    return;
-  }
-  await useAPI("auth/logout", "POST");
-  useState<User|null>("user").value = null;
-  useRouter().push("/");
+  return user;
 }

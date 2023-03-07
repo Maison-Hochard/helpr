@@ -17,13 +17,18 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config src/test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
+    "@apollo/client": "^3.7.5",
+    "@linear/sdk": "^2.1.0",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.0.0",
@@ -35,26 +40,33 @@
     "@nestjs/schedule": "^2.1.0",
     "@nestjs/swagger": "^6.1.4",
     "@nestjs/typeorm": "^8.0.3",
+    "@notionhq/client": "^2.2.3",
     "@prisma/client": "^4.9.0",
+    "@slack/web-api": "^6.8.1",
     "@types/cron": "^2.0.0",
+    "@types/crypto-js": "^4.1.1",
     "@types/passport-jwt": "^3.0.8",
     "@types/passport-local": "^1.0.34",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
-    "google-auth-library": "^8.7.0",
+    "crypto-js": "^4.1.1",
+    "deepl-node": "^1.8.0",
+    "googleapis": "^110.0.0",
+    "graphql": "^16.6.0",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.8.0",
+    "octokit": "^2.0.14",
+    "openai": "^3.1.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
-    "stripe": "^11.8.0",
-    "typeorm": "^0.3.11"
+    "stripe": "^11.8.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
@@ -78,7 +90,8 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.1.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "ngrok": "^4.3.3"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -86,8 +99,8 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": "src/test",
+    "testRegex": ".*\\.test\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

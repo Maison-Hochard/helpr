@@ -6,7 +6,7 @@ import { User, ResetPassword } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { JwtPayload } from "../auth/auth.service";
-import { encrypt, formatUser, generateCode } from "../utils";
+import { hash, formatUser, generateCode } from "../utils";
 import { Response } from "express";
 
 @Injectable()
@@ -18,22 +18,26 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const findUser = await this.prisma.user.findFirst({
+    const foundUser = await this.prisma.user.findFirst({
       where: {
         OR: [
-          { email: createUserDto.email },
-          { username: createUserDto.username },
+          {
+            username: createUserDto.username,
+          },
+          {
+            email: createUserDto.email,
+          },
         ],
       },
     });
-    if (findUser) {
+    if (foundUser) {
       throw new BadRequestException("user_already_exists");
     }
-    const hashedPassword = await encrypt(createUserDto.password);
+    const password = await hash(createUserDto.password);
     const user = await this.prisma.user.create({
       data: {
         ...createUserDto,
-        password: hashedPassword,
+        password,
       },
     });
     const url = await this.createVerificationUrl(user, false);
@@ -52,7 +56,7 @@ export class UserService {
           token: await generateCode(),
         },
       });
-    const url = `${this.configService.get("frontend_url")}/verify-user-${
+    const url = `${this.configService.get("frontend_url")}/verify/user?token=${
       resetEntity.token
     }`;
     if (isEmail) {
@@ -85,7 +89,7 @@ export class UserService {
     resetToken: string,
     response: Response,
   ): Promise<User> {
-    const encryptedRefreshToken = await encrypt(resetToken);
+    const encryptedRefreshToken = await hash(resetToken);
     const app_env = this.configService.get("env");
     await this.prisma.user.update({
       where: { id: user.id },
@@ -93,10 +97,18 @@ export class UserService {
         authToken,
         refreshToken: encryptedRefreshToken,
       },
+      include: {
+        subscription: true,
+      },
     });
     switch (app_env) {
       case "development":
         response.cookie("refreshToken", resetToken, {
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+          path: "/",
+        });
+        response.cookie("authToken", authToken, {
           httpOnly: true,
           maxAge: 1000 * 60 * 60 * 24 * 7,
           path: "/",
@@ -110,11 +122,18 @@ export class UserService {
           sameSite: "none",
           secure: true,
         });
+        response.cookie("authToken", authToken, {
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+          path: "/",
+          sameSite: "none",
+          secure: true,
+        });
     }
     return formatUser(user);
   }
 
-  async deleteRefreshToken(
+  async deleteTokens(
     userId: number,
     response: Response,
   ): Promise<{ message: string }> {
@@ -125,11 +144,16 @@ export class UserService {
       sameSite: "none",
       secure: true,
     });
+    response.clearCookie("authToken", {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
     await this.prisma.user.update({
       where: { id: userId },
-      data: { refreshToken: null },
+      data: { refreshToken: null, authToken: null },
     });
-    return { message: "refresh_token_deleted" };
+    return { message: "tokens_deleted" };
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -173,5 +197,15 @@ export class UserService {
     if (!user) throw new BadRequestException("user_not_found");
     await this.prisma.user.delete({ where: { id: userId } });
     return { message: "user deleted" };
+  }
+
+  async getUserByProviderId(providerId: string): Promise<User> {
+    const userCredentials = await this.prisma.providerCredentials.findUnique({
+      where: { providerId },
+    });
+    if (!userCredentials) throw new BadRequestException("user_not_found");
+    return await this.prisma.user.findUnique({
+      where: { id: userCredentials.userId },
+    });
   }
 }
