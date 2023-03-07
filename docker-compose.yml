@@ -8,14 +8,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8080"
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - APP_DOMAIN=${APP_DOMAIN}
-      - API_URL=${API_URL}
-      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - .:/app
   api:
@@ -26,17 +18,5 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:3000"
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
-      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
-      - FRONTEND_URL=${FRONTEND_URL}
-      - MAILER_HOST=${MAILER_HOST}
-      - MAILER_PORT=${MAILER_PORT}
-      - MAILER_USER=${MAILER_USER}
-      - MAILER_PASSWORD=${MAILER_PASSWORD}
     volumes:
       - .:/api
